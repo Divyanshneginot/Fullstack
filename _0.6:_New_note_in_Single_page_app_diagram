@@ -1,4 +1,6 @@
 sequenceDiagram
+   participant browser
+   participant server
    Note over browser: User writes new note and clicks save
    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
    activate server

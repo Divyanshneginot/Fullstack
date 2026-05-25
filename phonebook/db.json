@@ -19,11 +19,6 @@
       "name": "Mary Poppendieck",
       "number": "39-23-6423122",
       "id": "4"
-    },
-    {
-      "name": "mali",
-      "number": "43545346346",
-      "id": "DG6eM-CIG64"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

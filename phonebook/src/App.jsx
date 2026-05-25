@@ -3,9 +3,10 @@ import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
 import personService from './services/persons.js'
+import Notification from './components/Notification.jsx'
 const App = () => {
   const [persons, setPersons] = useState([]) 
-  
+  const [message,setMessage]=useState(null)
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [searchName, setSearchName] = useState('')
@@ -35,6 +36,12 @@ const App = () => {
             ))
             setNewName('')
             setNewNumber('')
+          }).catch(error=>{
+            setMessage(`Information of ${newName} has been already removed from the server`)
+            setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+        setPersons(persons.filter(n => n.id !== existingPerson.id))
           })
       }
       return 
@@ -43,14 +50,19 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-
+    
     personService
       .create(newperson)
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson))    
         setNewName('')
         setNewNumber('')
+        setMessage(returnedPerson.name)
+    setTimeout(() => {
+          setMessage(null)
+    }, 5000)
       })
+    
   }
 const deletePerson = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
@@ -83,6 +95,7 @@ const deletePerson = (id, name) => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message}/>
       <Filter 
         searchName={searchName} 
         handleSearchChange={handleSearchChange} 

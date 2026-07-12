@@ -1,12 +1,6 @@
-import { useState } from 'react'
+import BlogDetails from './BlogDetails'
 
-const Blog = ({ blog, addLike }) => {
-  const [visible, setVisible] = useState(false)
-
-  const toggleVisibility = () => {
-    setVisible(!visible)
-  }
-
+const Blog = ({ blog, addLike, handleRemove, user }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -16,23 +10,11 @@ const Blog = ({ blog, addLike }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className="blog">
       <div>
         {blog.title} {blog.author}
-        <button onClick={toggleVisibility}>{visible ? 'hide' : 'view'}</button>
       </div>
-
-      {/* Conditionally render this block based on the 'visible' state */}
-      {visible && (
-        <div>
-          <div>{blog.url}</div>
-          <div>
-            likes {blog.likes}
-            <button onClick={addLike}>like</button>
-          </div>
-          <div>{blog.user.name}</div>
-        </div>
-      )}
+      <BlogDetails blog={blog} addLike={addLike} handleRemove={handleRemove} user={user} />
     </div>
   )
 }

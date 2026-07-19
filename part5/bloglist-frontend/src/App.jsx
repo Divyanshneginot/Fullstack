@@ -1,18 +1,27 @@
 import { useState, useEffect } from 'react'
-import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import LoginForm from './components/LoginForm'
-import Togglable from './components/Togglable'
 import NewBlog from './components/NewBlog'
 import Notification from './components/Notification'
+import BlogDetails from './components/BlogDetails'
+import {
+  Routes, Route, Link,
+  useNavigate, useMatch
+} from 'react-router-dom'
+import {
+  Container, AppBar, Toolbar, Button,
+  Table, TableBody, TableCell,
+  TableContainer, TableRow, Paper
+} from '@mui/material'
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [message, setMessage] = useState(null)
-  const [blogVisible, setBlogVisible] = useState(false)
+  const navigate = useNavigate()
 
   const notify = (text) => {
     setMessage(text)
@@ -21,11 +30,17 @@ const App = () => {
     }, 5000)
   }
 
+  const match = useMatch('/blogs/:id')
+  const blogMatch = match
+    ? blogs.find(b => b.id === match.params.id)
+    : null
+
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs(blogs.sort((a, b) => b.likes - a.likes))
     )
   }, [])
+
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -34,48 +49,56 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
   const loginForm = () => (
-    <Togglable buttonLabel="login">
-      <LoginForm
-        username={username}
-        password={password}
-        handleUsernameChange={({ target }) => setUsername(target.value)}
-        handlePasswordChange={({ target }) => setPassword(target.value)}
-        handleSubmit={handleLogin}
-      />
-    </Togglable>
+    <LoginForm
+      username={username}
+      password={password}
+      handleUsernameChange={({ target }) => setUsername(target.value)}
+      handlePasswordChange={({ target }) => setPassword(target.value)}
+      handleSubmit={handleLogin}
+    />
   )
-  const blog = () => {
-    const hideWhenVisible = { display: blogVisible ? 'none' : '' }
-    const showWhenVisible = { display: blogVisible ? '' : 'none' }
+
+  const blogList = () => {
     return (
-      <div >
-        <div style={hideWhenVisible}>
-          <button onClick={() => setBlogVisible(true)}>new blog</button>
-        </div>
-        <div style={showWhenVisible}>
-          <NewBlog handleBlog={handleBlog} />
-          <button onClick={() => setBlogVisible(false)}>cancel</button>
-        </div>
-        {[...blogs].sort((a, b) => b.likes - a.likes).map(blog =>
-          <Blog key={blog.id} blog={blog} addLike={addLike} handleRemove={handleRemove} user={user} />
-        )}
+      <div>
+        <h2>Blogs</h2>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableBody>
+              {[...blogs].sort((a, b) => b.likes - a.likes).map(blog =>
+                <TableRow key={blog.id}>
+                  <TableCell>
+                    <Link to={`/blogs/${blog.id}`} style={{ textDecoration: 'none', color: '#1976d2' }}>
+                      {blog.title}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    {blog.author}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
     )
   }
+
   const handleBlog = async blogObject => {
     try {
       const returnedBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(returnedBlog))
-      setBlogVisible(false)
       notify(blogObject.title + ' by ' + blogObject.author)
+      navigate('/')
     } catch {
       notify('wrong credentials')
     }
   }
+
   const handleLogin = async event => {
     event.preventDefault()
-    console.log('Logging in with', { username, password })
     try {
       const user = await loginService.login({ username, password })
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
@@ -83,10 +106,12 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
+      navigate('/')
     } catch {
       notify('wrong credentials')
     }
   }
+
   const addLike = async (id, blogObject) => {
     try {
       const returnedBlog = await blogService.update(id, blogObject)
@@ -95,31 +120,52 @@ const App = () => {
       console.error('Error updating likes:', error)
     }
   }
+
   const handleRemove = (blog) => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       blogService
         .deleteBlog(blog.id)
         .then(() => {
           setBlogs(blogs.filter((b) => b.id !== blog.id))
+          navigate('/')
         })
         .catch((error) => {
           console.error('Error removing blog:', error)
         })
     }
   }
+
   return (
-    <div>
-      {user && <div>
-        <h2>blogs</h2>
-        <p>{user.name} logged in</p><button onClick={() => {
-          window.localStorage.removeItem('loggedBlogappUser')
-          setUser(null)
-        }}>logout</button>
-      </div>}
+    <Container>
+      <AppBar position="static">
+        <Toolbar>
+          <Button color="inherit" component={Link} to="/">blogs</Button>
+          {user
+            ? <>
+              <Button color="inherit" component={Link} to="/create">create new</Button>
+              <div style={{ flexGrow: 1 }} />
+              <em>{user.name} logged in</em>
+              <Button color="inherit" onClick={() => {
+                window.localStorage.removeItem('loggedBlogappUser')
+                setUser(null)
+                navigate('/')
+              }}>logout</Button>
+            </>
+            : <>
+              <div style={{ flexGrow: 1 }} />
+              <Button color="inherit" component={Link} to="/login">login</Button>
+            </>
+          }
+        </Toolbar>
+      </AppBar>
       <Notification message={message} />
-      {!user && loginForm()}
-      {user && blog()}
-    </div>
+      <Routes>
+        <Route path="/" element={user ? blogList() : loginForm()} />
+        <Route path="/login" element={loginForm()} />
+        <Route path="/blogs/:id" element={<BlogDetails blog={blogMatch} addLike={addLike} handleRemove={handleRemove} user={user} />} />
+        <Route path="/create" element={<NewBlog handleBlog={handleBlog} />} />
+      </Routes>
+    </Container>
   )
 }
 

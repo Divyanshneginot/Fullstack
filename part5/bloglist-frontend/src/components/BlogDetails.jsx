@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { Button } from '@mui/material'
 
 const BlogDetails = ({ blog, addLike, handleRemove, user }) => {
-  const [blogdetail, setBlogDetail] = useState(false)
+  if (!blog) {
+    return <p>Blog not found</p>
+  }
 
   const handleLike = () => {
     const updatedBlog = {
@@ -13,20 +15,15 @@ const BlogDetails = ({ blog, addLike, handleRemove, user }) => {
 
   return (
     <div>
-      <button onClick={() => setBlogDetail(!blogdetail)}>
-        {blogdetail ? 'hide' : 'view'}
-      </button>
-      {blogdetail && (
-        <div className="blog-details">
-          <p>{blog.url}</p>
-          <p>
-            likes {blog.likes} <button onClick={handleLike}>like</button>
-          </p>
-          <p>{blog.user ? blog.user.name : ''}</p>
-          {user && blog.user && user.username === blog.user.username && (
-            <button onClick={() => handleRemove(blog)}>remove</button>
-          )}
-        </div>
+      <h2>{blog.title}</h2>
+      <p><a href={blog.url}>{blog.url}</a></p>
+      <p>
+        likes {blog.likes}{' '}
+        {user && <Button variant="contained" color="primary" onClick={handleLike}>like</Button>}
+      </p>
+      <p>added by {blog.user ? blog.user.name : 'unknown'}</p>
+      {user && blog.user && user.username === blog.user.username && (
+        <Button variant="outlined" color="error" onClick={() => handleRemove(blog)}>remove</Button>
       )}
     </div>
   )

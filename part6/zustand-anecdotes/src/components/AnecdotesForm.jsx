@@ -1,12 +1,19 @@
-import {useAnecdoteActions} from '../store'
+import { useAnecdoteActions } from '../store'
+import { useNotificationActions } from '../notificationStore'
+
 const AnecdotesForm = () => {
     const { add } = useAnecdoteActions() 
+    const { notify } = useNotificationActions()
+
     return (
         <div>
       <h2>create new</h2>
       <form onSubmit={(e) => {
         e.preventDefault()
-        add(e.target[0].value)
+        const content = e.target[0].value
+        add(content)
+        notify(`new anecdote '${content}'`, 5)
+        e.target[0].value = ''
       }}>
         <div>
           <input name="note"/>

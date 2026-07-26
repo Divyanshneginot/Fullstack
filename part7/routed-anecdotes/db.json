@@ -1,0 +1,33 @@
+{
+  "anecdotes": [
+    {
+      "content": "If it hurts, do it more often",
+      "author": "Jez Humble",
+      "info": "https://martinfowler.com/bliki/FrequencyReducesDifficulty.html",
+      "votes": 0,
+      "id": "1"
+    },
+    {
+      "content": "Premature optimization is the root of all evil",
+      "author": "Donald Knuth",
+      "info": "http://wiki.c2.com/?PrematureOptimization",
+      "votes": 0,
+      "id": "2"
+    },
+    {
+      "content": "power rules for coding",
+      "author": "divy",
+      "info": "powerrules.com",
+      "votes": 0,
+      "id": "nOmdQC71ahM"
+    },
+    {
+      "content": "borly the lengendary super saiyan",
+      "author": "henry",
+      "info": "dbsmovie.com",
+      "votes": 0,
+      "id": "B0C7pgXAQn4"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

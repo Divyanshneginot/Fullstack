@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getAnecdotes, createAnecdote, updateAnecdote } from './components/requests'
+import { getAnecdotes, createAnecdote, updateAnecdote } from '../components/requests'
 
 export const useAnecdotes = () => {
   return useQuery({
